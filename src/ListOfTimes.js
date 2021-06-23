@@ -1,21 +1,32 @@
 import React from 'react';
 import datalog from './HOS log.json';
+import Queue from './Queue'
 
 
 function ListOfTimes() {
     let list = [];
     let daysPassed = 1;
     let weeklyGrossHours = 0;
-    let totalHoursIn7Days = 0;
+    let totalHoursInLast7Days = 0;
     let totalHoursToday = 0;
-    let hoursOfOldestDay = 0;
+    let queueOfDailyHours = new Queue();
 
     for (const i of Object.keys(datalog)) {
         for (let k = 0; k < datalog[i].data.length; k++) {
             totalHoursToday = PushTimeToList(i, k, list, daysPassed);
+
             weeklyGrossHours += totalHoursToday;
             weeklyGrossHours = CalculateGrossPay(i, k, list, weeklyGrossHours);
-            if (totalHoursIn7Days >= 56) {
+
+            totalHoursInLast7Days = CalculateTotalHoursInLast7Days(totalHoursInLast7Days, totalHoursToday, queueOfDailyHours)
+
+            if (daysPassed % 7 === 0) {
+                list.push(queueOfDailyHours.weeklySummary(totalHoursInLast7Days))
+            }
+
+            list.push(<ul>Total Hours in Last 7 Days: {totalHoursInLast7Days}</ul>)
+
+            if (totalHoursInLast7Days >= 56) {
                 list.push(<ul>WARNING: TOTAL HOURS WORKED IN THE LAST 7 DAYS IS WITHIN 80% OF 70 HOURS</ul>)
             }
             daysPassed++;
@@ -41,27 +52,36 @@ function PushTimeToList(i, k, list, daysPassed) {
 function CalculateGrossPay(i, k, list, weeklyGrossHours) {
     let endDay = new Date(datalog[i].data[k].endTime);
     let isSunday = endDay.getDay();
+    let overtime = 0;
+
     if (isSunday === 0) {
-        list.push(<ul>Total Hours Worked This Week: {weeklyGrossHours.toString()}</ul>)
+        if(weeklyGrossHours > 40) {
+            overtime = weeklyGrossHours - 40;
+            weeklyGrossHours = 40;
+        }
+        let weeklyGrossPay = (weeklyGrossHours * 22) + (overtime * 33);
+        list.push(<ul>Weekly Gross Pay: ${weeklyGrossPay}</ul>)
         weeklyGrossHours = 0;
-    }
-    else {
-        list.push(<ul>Total Hours Worked So Far: {weeklyGrossHours.toString()}</ul>)
     }
 
     return weeklyGrossHours
 }
 
-function CalculateTotalHoursInLast7Days(totalHoursIn7Days, totalHoursToday, hoursOfOldestDay, daysPassed) {
-    if (daysPassed > 7) {
-        totalHoursIn7Days -= hoursOfOldestDay;
-        totalHoursIn7Days += totalHoursToday;
+function CalculateTotalHoursInLast7Days(totalHoursInLast7Days, totalHoursToday, queueOfDailyHours) {
+    if (queueOfDailyHours.length() === 7) {
+        totalHoursInLast7Days -= queueOfDailyHours.peek();
+        totalHoursInLast7Days += totalHoursToday;
+
+        queueOfDailyHours.pop();
+        queueOfDailyHours.push(totalHoursToday);
     }
     else {
-        totalHoursIn7Days += totalHoursToday;
+        totalHoursInLast7Days += totalHoursToday;
+
+        queueOfDailyHours.push(totalHoursToday);
     }
 
-    return totalHoursIn7Days
+    return totalHoursInLast7Days
 }
 
 export default ListOfTimes;
