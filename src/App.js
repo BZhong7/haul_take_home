@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import ListOfTimes from './ListOfTimes.js'
+import ListOfTimes from './ListOfTimes.js';
 
 function App() {
   return (

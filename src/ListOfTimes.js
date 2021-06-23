@@ -10,8 +10,8 @@ function ListOfTimes() {
     let totalHoursToday = 0;
     let hoursOfOldestDay = 0;
 
-    for (let i = 0; i < 2; i++) {
-        for (let k = 0; k < 32; k++) {
+    for (const i of Object.keys(datalog)) {
+        for (let k = 0; k < datalog[i].data.length; k++) {
             totalHoursToday = PushTimeToList(i, k, list, daysPassed);
             weeklyGrossHours += totalHoursToday;
             weeklyGrossHours = CalculateGrossPay(i, k, list, weeklyGrossHours);
@@ -20,16 +20,6 @@ function ListOfTimes() {
             }
             daysPassed++;
         }
-    }
-
-    for(let j = 0; j < 12; j++) {
-        totalHoursToday = PushTimeToList(2, j, list, daysPassed);
-        weeklyGrossHours += totalHoursToday;
-        weeklyGrossHours = CalculateGrossPay(2, j, list, weeklyGrossHours);
-        if (totalHoursIn7Days >= 56) {
-            list.push(<ul>WARNING: TOTAL HOURS WORKED THIS WEEK IS WITHIN 80% OF 70 HOURS</ul>)
-        }
-        daysPassed++;
     }
 
     return (<div>{list}</div>)
