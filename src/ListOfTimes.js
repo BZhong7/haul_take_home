@@ -37,6 +37,7 @@ function ListOfTimes() {
                 list.push(<ul>WARNING: TOTAL HOURS WORKED IN THE LAST 7 DAYS IS WITHIN 80% OF 70 HOURS</ul>)
             }
             daysPassed++;
+            list.push(<br></br>)
         }
     }
 
